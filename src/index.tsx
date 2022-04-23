@@ -1,11 +1,10 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules, Platform, DeviceEventEmitter } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-accessibility-manager-plugin' doesn't seem to be linked. Make sure: \n\n` +
   Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo managed workflow\n';
-
 const AccessibilityManagerPlugin = NativeModules.AccessibilityManagerPlugin
   ? NativeModules.AccessibilityManagerPlugin
   : new Proxy(
@@ -17,6 +16,33 @@ const AccessibilityManagerPlugin = NativeModules.AccessibilityManagerPlugin
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return AccessibilityManagerPlugin.multiply(a, b);
+export function invokeApp(data = {}): Promise<number> {
+  return AccessibilityManagerPlugin.invokeApp(typeof data !== 'object' ? {} : data);
+}
+export function askForDisplayOverOtherAppsPermission(): Promise<boolean> {
+  return AccessibilityManagerPlugin.askForDisplayOverOtherAppsPermission();
+}
+export function canDisplayOverOtherApps(): Promise<boolean> {
+  return AccessibilityManagerPlugin.canDisplayOverOtherApps();
+}
+
+export function isAccessibilityOn(): Promise<boolean> {
+  return AccessibilityManagerPlugin.isAccessibilityOn();
+}
+
+export function openAccessibilitySettings(): Promise<boolean> {
+  return AccessibilityManagerPlugin.openAccessibilitySettings();
+}
+
+let listenWpSentEvent: any = null
+export function listenWpSent(eventName: string, callback:Function): void {
+  if (listenWpSentEvent !== null) {
+    listenWpSentEvent = DeviceEventEmitter.addListener(eventName, callback);
+    return AccessibilityManagerPlugin.addEventListener(eventName);
+  }
+}
+
+export function removeListenWpSent(): void {
+  DeviceEventEmitter.removeAllListeners();
+  return AccessibilityManagerPlugin.removeEventListener();
 }
