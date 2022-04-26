@@ -135,13 +135,7 @@
         }
       ],
       "module",
-      "typescript",
-      [
-        "aar",
-        {
-          "reverseJetify": true
-        }
-      ]
+      "typescript"
     ]
   }
 }
