@@ -21,8 +21,8 @@ export function invokeApp(data = {}): Promise<number> {
     typeof data !== 'object' ? {} : data
   );
 }
-export function askForDisplayOverOtherAppsPermission(): Promise<boolean> {
-  return AccessibilityManagerPlugin.askForDisplayOverOtherAppsPermission();
+export function openDisplayOverOtherAppsPermissionSettings(): Promise<boolean> {
+  return AccessibilityManagerPlugin.openDisplayOverOtherAppsPermissionSettings();
 }
 export function canDisplayOverOtherApps(): Promise<boolean> {
   return AccessibilityManagerPlugin.canDisplayOverOtherApps();
