@@ -9,14 +9,12 @@
     "start": "react-native start",
     "purge:js": "rm -rf node_modules && rm -rf package-lock.json && npm cache verify",
     "purge:android": "(cd android && ./gradlew --stop) && rm -rf ~/.gradle/caches/ android/app/build",
-    "purge:ios": "rm -rf ios/Pods/* ios/Podfile.lock ios/build ~/Library/Caches/CocoaPods ~/Library/Developer/Xcode/DerivedData && pod cache clean --all",
-    "purge:install": "npm install && npx pod-install && react-native start --reset-cache",
-    "purge": "npm run purge:js && npm run purge:android && npm run purge:ios && npm run purge:install"
+    "purge:install": "npm install",
+    "purge": "npm run purge:js && npm run purge:android  && npm run purge:install"
   },
   "dependencies": {
     "react": "16.13.1",
-    "react-native": "0.63.4",
-    "react-native-background-actions": "^2.6.6"
+    "react-native": "0.63.4"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

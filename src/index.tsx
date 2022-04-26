@@ -17,7 +17,9 @@ const AccessibilityManagerPlugin = NativeModules.AccessibilityManagerPlugin
     );
 
 export function invokeApp(data = {}): Promise<number> {
-  return AccessibilityManagerPlugin.invokeApp(typeof data !== 'object' ? {} : data);
+  return AccessibilityManagerPlugin.invokeApp(
+    typeof data !== 'object' ? {} : data
+  );
 }
 export function askForDisplayOverOtherAppsPermission(): Promise<boolean> {
   return AccessibilityManagerPlugin.askForDisplayOverOtherAppsPermission();
@@ -34,10 +36,13 @@ export function openAccessibilitySettings(): Promise<boolean> {
   return AccessibilityManagerPlugin.openAccessibilitySettings();
 }
 
-let listenWpSentEvent: any = null
-export function listenWpSent(eventName: string, callback:Function): void {
+let listenWpSentEvent: any = null;
+export function listenWpSent(eventName: string, callback: Function): void {
   if (listenWpSentEvent !== null) {
-    listenWpSentEvent = DeviceEventEmitter.addListener(eventName, callback);
+    const test = (event: any) => {
+      callback(event);
+    };
+    listenWpSentEvent = DeviceEventEmitter.addListener(eventName, test);
     return AccessibilityManagerPlugin.addEventListener(eventName);
   }
 }

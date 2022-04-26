@@ -2,24 +2,14 @@
   "name": "react-native-accessibility-manager-plugin",
   "version": "0.1.0",
   "description": "desc",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
-  "types": "lib/typescript/index.d.ts",
-  "react-native": "src/index",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "types": "lib/typescript/src/index.d.ts",
+  "react-native": "src/index.tsx",
   "source": "src/index",
   "files": [
-    "src",
-    "lib",
-    "android",
-    "ios",
-    "cpp",
-    "react-native-accessibility-manager-plugin.podspec",
-    "!lib/typescript/example",
-    "!android/build",
-    "!ios/build",
-    "!**/__tests__",
-    "!**/__fixtures__",
-    "!**/__mocks__"
+    "lib/",
+    "src/"
   ],
   "scripts": {
     "test": "jest",
@@ -29,7 +19,11 @@
     "release": "release-it",
     "example": "yarn --cwd example",
     "pods": "cd example && pod-install --quiet",
-    "bootstrap": "yarn example && yarn && yarn pods"
+    "bootstrap": "yarn example && yarn && yarn pods",
+    "purge:js": "rm -rf node_modules && rm -rf package-lock.json && npm cache verify",
+    "purge:android": "(cd android && ./gradlew --stop) && rm -rf ~/.gradle/caches/ android/app/build",
+    "purge:install": "npm install",
+    "purge": "npm run purge:js && npm run purge:android && npm run purge:install"
   },
   "keywords": [
     "react-native",
@@ -63,7 +57,7 @@
     "prettier": "^2.0.5",
     "react": "16.13.1",
     "react-native": "0.63.4",
-    "react-native-builder-bob": "^0.18.0",
+    "react-native-builder-bob": "^0.18.2",
     "release-it": "^14.2.2",
     "typescript": "^4.1.3"
   },
@@ -134,12 +128,18 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "commonjs",
-      "module",
       [
-        "typescript",
+        "commonjs",
         {
-          "project": "tsconfig.build.json"
+          "copyFlow": true
+        }
+      ],
+      "module",
+      "typescript",
+      [
+        "aar",
+        {
+          "reverseJetify": true
         }
       ]
     ]
