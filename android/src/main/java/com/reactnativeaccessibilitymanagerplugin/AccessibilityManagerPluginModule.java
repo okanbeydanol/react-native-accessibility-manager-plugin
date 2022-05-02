@@ -3,8 +3,6 @@ package com.reactnativeaccessibilitymanagerplugin;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Application;
-import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +21,6 @@ import androidx.annotation.RequiresApi;
 import androidx.core.content.FileProvider;
 import androidx.loader.content.CursorLoader;
 
-import com.facebook.react.HeadlessJsTaskService;
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -37,21 +34,15 @@ import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @ReactModule(name = AccessibilityManagerPluginModule.NAME)
-public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule  implements ActivityEventListener {
+public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule implements ActivityEventListener {
   public static final String NAME = "AccessibilityManagerPlugin";
   private static ReactApplicationContext reactContext;
   public static final String LOG_TAG = "RNInvokeApp";
-  public static final String TAG = "dfgsdfgsdgsdfgsdf";
-  public static final String TAG2 = "dfgsdfgsdgsdfgsdf222";
   private static Bundle bundle = null;
-  private Promise mPromise;
   private final int DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE = 1222;
-  private final WhatsappAccessibilityService mConnectivityReceiver = new WhatsappAccessibilityService();
 
   public AccessibilityManagerPluginModule(ReactApplicationContext context) {
     super(context);
@@ -65,41 +56,6 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     return NAME;
   }
 
-  @ReactMethod
-  public void multiply(int a, int b, Promise promise) {
-    promise.resolve(a * b);
-  }
-
-  public static native int nativeMultiply(int a, int b);
-
-  @ReactMethod
-  public void invokeApp(ReadableMap params) {
-    ReadableMap data = params.hasKey("data") ? params.getMap("data") : null;
-
-    if (data != null) {
-      bundle = Arguments.toBundle(data);
-    }
-
-    String packageName = reactContext.getPackageName();
-    Intent launchIntent = reactContext.getPackageManager().getLaunchIntentForPackage(packageName);
-    String className = launchIntent.getComponent().getClassName();
-
-    try {
-      Class<?> activityClass = Class.forName(className);
-      Intent activityIntent = new Intent(reactContext, activityClass);
-
-      activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-      reactContext.startActivity(activityIntent);
-    } catch (Exception e) {
-      Log.e(LOG_TAG, "Class not found", e);
-      return;
-    }
-
-    if (isAppOnForeground(reactContext)) {
-      sendEvent("appInvoked");
-    }
-  }
-
   public static void sendEvent(String eventName) {
     if (bundle != null) {
       reactContext
@@ -110,10 +66,11 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   }
 
   public static void sendData(String eventName, WritableMap event) {
-      reactContext
-        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-        .emit(eventName, event);
+    reactContext
+      .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+      .emit(eventName, event);
   }
+
   private boolean isAppOnForeground(ReactApplicationContext context) {
     /**
      * We need to check if app is in foreground otherwise the app will crash.
@@ -132,110 +89,6 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
       }
     }
     return false;
-  }
-
-  @SuppressLint("LongLogTag")
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  @ReactMethod
-  public void openDisplayOverOtherAppsPermissionSettings(Promise promise) {
-    mPromise = promise;
-    if (!Settings.canDrawOverlays(reactContext)) {
-      Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + reactContext.getPackageName()));
-      reactContext.startActivityForResult(intent, DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE, null);
-    }
-    promise.resolve(true);
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  @ReactMethod
-  public void canDisplayOverOtherApps(Promise promise) {
-    if (Settings.canDrawOverlays(reactContext)) {
-      promise.resolve(true);
-    } else {
-      promise.resolve(false);
-    }
-
-  }
-
-  @SuppressLint("LongLogTag")
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  @ReactMethod
-  public void openAccessibilitySettings(Promise promise) {
-    int accessibilityEnabled = 0;
-    try {
-      accessibilityEnabled = Settings.Secure.getInt(reactContext.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
-      if (accessibilityEnabled == 0){
-        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-          | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        reactContext.startActivity(intent);
-      }
-      promise.resolve(accessibilityEnabled);
-    } catch (Settings.SettingNotFoundException ignored) {
-      promise.resolve(accessibilityEnabled);
-    }
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  @ReactMethod
-  public void isAccessibilityOn(Promise promise) {
-    int accessibilityEnabled = 0;
-    try {
-      accessibilityEnabled = Settings.Secure.getInt(reactContext.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
-      if (accessibilityEnabled == 0) {
-        promise.resolve(false);
-      }else{
-        promise.resolve(true);
-      }
-    } catch (Settings.SettingNotFoundException ignored) {
-      promise.resolve(false);
-    }
-  }
-
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  @ReactMethod
-  public void sendMedia(String filepath, Promise promise) throws IOException {
-
-    Uri uri2 = Uri.parse("smsto:" + "05418581704");
-
-    Uri uri = Uri.parse(filepath);
-    String realPath= getRealPathFromURI(reactContext, uri,true);
-    File file = new File(realPath);
-    Log.w(TAG, "sendMedia: " + reactContext.getPackageName() );
-    Uri imageUri = FileProvider.getUriForFile(reactContext,reactContext.getPackageName() + ".provider", file);
-    Intent intent = new Intent(Intent.ACTION_SEND);
-    intent.setPackage("com.whatsapp");
-    intent.setType("image/*");
-    intent.putExtra("jid",  "905418581704@s.whatsapp.net");
-    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    intent.putExtra(Intent.EXTRA_STREAM, imageUri);
-    intent.putExtra(Intent.EXTRA_TEXT, "My sample image text");
-    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    reactContext.startActivityForResult(intent, 1, null );
-    promise.resolve("");
-    //intentShareFile.putExtra(Intent.EXTRA_STREAM, new File(filepath).toURI());
-    // intentShareFile.putExtra(Intent.EXTRA_SUBJECT,
-    //   "Share");
-    //intentShareFile.putExtra("jid",  "905418581704@s.whatsapp.net");
-    // intentShareFile.setPackage("com.whatsapp");
-    //intentShareFile.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    // intentShareFile.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-
-    //Uri uri = Uri.parse("smsto:" + "05418581704");
-    //Intent shareIntent = new Intent(Intent.ACTION_SEND);
-    //shareIntent.setPackage("com.whatsapp");
-    // shareIntent.putExtra(Intent.EXTRA_TEXT, "My sample image text");
-    //shareIntent.putExtra(Intent.EXTRA_STREAM, imageUri);
-    // shareIntent.setType("image/jpeg");
-    //shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    // shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-   try {
-       //reactContext.startActivity(intentShareFile);
-     } catch (ActivityNotFoundException ex) {
-       Log.w(TAG, ex.getMessage());
-    }
   }
 
   public static boolean isExternalStorageDocument(Uri uri) {
@@ -257,7 +110,7 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   public static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
     Cursor cursor = null;
     final String column = MediaStore.MediaColumns.DATA;
-    final String[] projection = { column };
+    final String[] projection = {column};
 
     try {
       CursorLoader loader = new CursorLoader(context, uri, projection, selection, selectionArgs, null);
@@ -349,37 +202,140 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
 
   @Override
   public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
-    Log.w(TAG, "requestCode" + String.valueOf(requestCode));
-    Log.w(TAG, "resultCode" + String.valueOf(resultCode));
-    Log.w(TAG, "data" + String.valueOf(data));
-    Log.w(TAG, String.valueOf("onActivityResult"));
-    if (requestCode == 1){
+    if (requestCode == 1) {
       WritableMap data2 = Arguments.createMap();
       data2.putBoolean("sented", true);
       AccessibilityManagerPluginModule.sendData("wpsented", data2);
     }
-
-
   }
 
   @Override
-  public void onNewIntent(Intent intent) {
-    Log.w(TAG, String.valueOf("onNewIntent"));
+  public void onNewIntent(Intent intent) {}
+
+  @SuppressLint("LongLogTag")
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @ReactMethod
+  public void openDisplayOverOtherAppsPermissionSettings(Promise promise) {
+    if (!Settings.canDrawOverlays(reactContext)) {
+      Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + reactContext.getPackageName()));
+      reactContext.startActivityForResult(intent, DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE, null);
+    }
+    promise.resolve(true);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @ReactMethod
-  public void sendText(String phone, String text) {
-    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://api.whatsapp.com/send?phone="+phone+"=&text="+text+""));
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-      | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-    intent.setPackage("com.whatsapp");
+  public void canDisplayOverOtherApps(Promise promise) {
+    if (Settings.canDrawOverlays(reactContext)) {
+      promise.resolve(true);
+    } else {
+      promise.resolve(false);
+    }
+
+  }
+
+  @SuppressLint("LongLogTag")
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @ReactMethod
+  public void openAccessibilitySettings(Promise promise) {
+    int accessibilityEnabled = 0;
+    try {
+      accessibilityEnabled = Settings.Secure.getInt(reactContext.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
+      if (accessibilityEnabled == 0) {
+        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+          | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        reactContext.startActivity(intent);
+      }
+      promise.resolve(accessibilityEnabled);
+    } catch (Settings.SettingNotFoundException ignored) {
+      promise.resolve(accessibilityEnabled);
+    }
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @ReactMethod
+  public void isAccessibilityOn(Promise promise) {
+    int accessibilityEnabled = 0;
+    try {
+      accessibilityEnabled = Settings.Secure.getInt(reactContext.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
+      if (accessibilityEnabled == 0) {
+        promise.resolve(false);
+      } else {
+        promise.resolve(true);
+      }
+    } catch (Settings.SettingNotFoundException ignored) {
+      promise.resolve(false);
+    }
+  }
+
+  @ReactMethod
+  public void invokeApp(ReadableMap params) {
+    ReadableMap data = params.hasKey("data") ? params.getMap("data") : null;
+
+    if (data != null) {
+      bundle = Arguments.toBundle(data);
+    }
+
+    String packageName = reactContext.getPackageName();
+    Intent launchIntent = reactContext.getPackageManager().getLaunchIntentForPackage(packageName);
+    String className = launchIntent.getComponent().getClassName();
 
     try {
-      reactContext.startActivity(intent);
-    } catch (android.content.ActivityNotFoundException ex) {
-      Log.w(TAG, ex.getMessage());
+      Class<?> activityClass = Class.forName(className);
+      Intent activityIntent = new Intent(reactContext, activityClass);
+
+      activityIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+      reactContext.startActivity(activityIntent);
+    } catch (Exception e) {
+      Log.e(LOG_TAG, "Class not found", e);
+      return;
     }
+
+    if (isAppOnForeground(reactContext)) {
+      sendEvent("appInvoked");
+    }
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @ReactMethod
+  public void sendText(String phone, String text, Promise promise) {
+    if (phone == null || phone == "" || text == null || text == "") {
+      promise.resolve(false);
+    }
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setPackage("com.whatsapp");
+    intent.setType("text/plain");
+    intent.putExtra("jid", phone + "@s.whatsapp.net");
+    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    intent.putExtra(Intent.EXTRA_TEXT, text);
+    reactContext.startActivityForResult(intent, 1, null);
+    promise.resolve(true);
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @ReactMethod
+  public void sendImage(String filepath, String phone, String text, Promise promise) {
+    if (filepath == null || filepath == "" | phone == null || phone == "") {
+      promise.resolve(false);
+    }
+    Uri uri = Uri.parse(filepath);
+    String realPath = getRealPathFromURI(reactContext, uri, true);
+    File file = new File(realPath);
+    if (!file.exists()) {
+      promise.resolve(false);
+    }
+    Uri imageUri = FileProvider.getUriForFile(reactContext, reactContext.getPackageName() + ".provider", file);
+    Intent intent = new Intent(Intent.ACTION_SEND);
+    intent.setPackage("com.whatsapp");
+    intent.setType("image/*");
+    intent.putExtra("jid", phone + "@s.whatsapp.net");
+    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    intent.putExtra(Intent.EXTRA_STREAM, imageUri);
+    intent.putExtra(Intent.EXTRA_TEXT, text);
+    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    reactContext.startActivityForResult(intent, 1, null);
+    promise.resolve(true);
   }
 }
 

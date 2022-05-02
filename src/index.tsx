@@ -1,4 +1,4 @@
-import { NativeModules, Platform, DeviceEventEmitter } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-accessibility-manager-plugin' doesn't seem to be linked. Make sure: \n\n` +
@@ -36,6 +36,13 @@ export function openAccessibilitySettings(): Promise<boolean> {
   return AccessibilityManagerPlugin.openAccessibilitySettings();
 }
 
-export function sendMedia(filePath: string): Promise<boolean> {
-  return AccessibilityManagerPlugin.sendMedia(filePath);
+export function sendImage(
+  filePath: string,
+  phoneNumber: string,
+  text?: string
+): Promise<boolean> {
+  return AccessibilityManagerPlugin.sendMedia(filePath, phoneNumber, text);
+}
+export function sendText(phoneNumber: string, text: string): Promise<boolean> {
+  return AccessibilityManagerPlugin.sendText(phoneNumber, text);
 }
