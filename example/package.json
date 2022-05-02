@@ -9,12 +9,15 @@
     "start": "react-native start",
     "purge:js": "rm -rf node_modules && rm -rf package-lock.json && npm cache verify",
     "purge:android": "(cd android && ./gradlew --stop) && rm -rf ~/.gradle/caches/ android/app/build",
-    "purge:install": "npm install",
-    "purge": "npm run purge:js && npm run purge:android  && npm run purge:install"
+    "purge:android:refresh-dependencies": "(cd android && ./gradlew clean) && (cd android && gradle cleanBuildCache) && (cd android && ./gradlew build --refresh-dependencies)",
+    "purge:install": "yarn install",
+    "purge": "npm run purge:js && npm run purge:android && npm run purge:install && npm run purge:android:refresh-dependencies && react-native start --reset-cache"
   },
   "dependencies": {
     "react": "16.13.1",
-    "react-native": "0.63.4"
+    "react-native": "0.63.4",
+    "react-native-background-actions": "^2.6.7",
+    "react-native-image-picker": "^4.7.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

@@ -36,18 +36,6 @@ export function openAccessibilitySettings(): Promise<boolean> {
   return AccessibilityManagerPlugin.openAccessibilitySettings();
 }
 
-let listenWpSentEvent: any = null;
-export function listenWpSent(eventName: string, callback: Function): void {
-  if (listenWpSentEvent !== null) {
-    const test = (event: any) => {
-      callback(event);
-    };
-    listenWpSentEvent = DeviceEventEmitter.addListener(eventName, test);
-    return AccessibilityManagerPlugin.addEventListener(eventName);
-  }
-}
-
-export function removeListenWpSent(): void {
-  DeviceEventEmitter.removeAllListeners();
-  return AccessibilityManagerPlugin.removeEventListener();
+export function sendMedia(filePath: string): Promise<boolean> {
+  return AccessibilityManagerPlugin.sendMedia(filePath);
 }
