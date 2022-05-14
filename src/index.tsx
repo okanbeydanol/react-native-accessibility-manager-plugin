@@ -41,7 +41,7 @@ export function sendImage(
   phoneNumber: string,
   text?: string
 ): Promise<boolean> {
-  return AccessibilityManagerPlugin.sendMedia(filePath, phoneNumber, text);
+  return AccessibilityManagerPlugin.sendImage(filePath, phoneNumber, text);
 }
 export function sendText(phoneNumber: string, text: string): Promise<boolean> {
   return AccessibilityManagerPlugin.sendText(phoneNumber, text);

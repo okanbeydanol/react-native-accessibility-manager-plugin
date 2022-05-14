@@ -23,6 +23,12 @@ public class WhatsappAccessibilityService extends AccessibilityService {
       return;
     }
 
+    try {
+      TimeUnit.SECONDS.sleep(1);
+    } catch (InterruptedException ignored) {
+
+    }
+
     AccessibilityNodeInfoCompat rootInActiveWindow = AccessibilityNodeInfoCompat.wrap(getRootInActiveWindow());
 
     // Whatsapp Message EditText id
@@ -87,10 +93,7 @@ public class WhatsappAccessibilityService extends AccessibilityService {
   @Override
   public void onServiceConnected() {
     AccessibilityServiceInfo info = getServiceInfo();
-    info.eventTypes =
-      AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED
-        | AccessibilityEvent.TYPE_VIEW_CLICKED
-        | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+    info.eventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
     info.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC;
     info.packageNames = new String[]{"com.whatsapp"};
