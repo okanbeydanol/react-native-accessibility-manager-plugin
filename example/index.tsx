@@ -1,7 +1,6 @@
 import { AppRegistry } from 'react-native';
 import App from './src/App';
 import { name as appName } from './app.json';
-import { openAccessibilitySettings } from 'react-native-accessibility-manager-plugin';
 
 // const addddd = async (taskData) => {
 //   setInterval(() => {
@@ -10,5 +9,3 @@ import { openAccessibilitySettings } from 'react-native-accessibility-manager-pl
 // };
 
 AppRegistry.registerComponent(appName, () => App);
-
-openAccessibilitySettings();

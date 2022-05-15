@@ -1,11 +1,13 @@
 package com.reactnativeaccessibilitymanagerplugin;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -15,6 +17,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -54,6 +57,10 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   @NonNull
   public String getName() {
     return NAME;
+  }
+
+  public static ReactApplicationContext getReactContext(){
+    return reactContext;
   }
 
   public static void sendEvent(String eventName) {
@@ -212,7 +219,6 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   @Override
   public void onNewIntent(Intent intent) {}
 
-  @SuppressLint("LongLogTag")
   @RequiresApi(api = Build.VERSION_CODES.M)
   @ReactMethod
   public void openDisplayOverOtherAppsPermissionSettings(Promise promise) {
@@ -241,12 +247,10 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     int accessibilityEnabled = 0;
     try {
       accessibilityEnabled = Settings.Secure.getInt(reactContext.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
-      if (accessibilityEnabled == 0) {
-        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
-          | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        reactContext.startActivity(intent);
-      }
+      Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+      reactContext.startActivity(intent);
       promise.resolve(accessibilityEnabled);
     } catch (Settings.SettingNotFoundException ignored) {
       promise.resolve(accessibilityEnabled);
@@ -256,17 +260,15 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   @RequiresApi(api = Build.VERSION_CODES.M)
   @ReactMethod
   public void isAccessibilityOn(Promise promise) {
-    int accessibilityEnabled = 0;
-    try {
-      accessibilityEnabled = Settings.Secure.getInt(reactContext.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
-      if (accessibilityEnabled == 0) {
-        promise.resolve(false);
-      } else {
+    AccessibilityManager am = (AccessibilityManager) reactContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+    List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+
+    for (AccessibilityServiceInfo enabledService : enabledServices) {
+      ServiceInfo enabledServiceInfo = enabledService.getResolveInfo().serviceInfo;
+      if (enabledServiceInfo.packageName.equals(reactContext.getPackageName()) && enabledServiceInfo.name.equals(WhatsappAccessibilityService.class.getName()))
         promise.resolve(true);
-      }
-    } catch (Settings.SettingNotFoundException ignored) {
-      promise.resolve(false);
     }
+    promise.resolve(false);
   }
 
   @ReactMethod
@@ -276,7 +278,6 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     if (data != null) {
       bundle = Arguments.toBundle(data);
     }
-
     String packageName = reactContext.getPackageName();
     Intent launchIntent = reactContext.getPackageManager().getLaunchIntentForPackage(packageName);
     String className = launchIntent.getComponent().getClassName();
