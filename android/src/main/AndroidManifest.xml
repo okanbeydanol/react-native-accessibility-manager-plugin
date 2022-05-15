@@ -1,33 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  package="com.reactnativeaccessibilitymanagerplugin">
-  <uses-permission android:name="android.permission.WAKE_LOCK" />
-  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-  <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
-    tools:ignore="ProtectedPermissions" />
-  <application>
-    <provider
-      android:name="androidx.core.content.FileProvider"
-      android:authorities="${applicationId}.provider"
-      android:exported="false"
-      android:grantUriPermissions="true">
-      <meta-data
-        android:name="android.support.FILE_PROVIDER_PATHS"
-        android:resource="@xml/provider_paths" />
-    </provider>
-    <service
-      android:name="com.reactnativeaccessibilitymanagerplugin.WhatsappAccessibilityService"
-      android:label="Accessibility Service"
-      android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-      android:exported="true">
-      <meta-data
-        android:name="android.accessibilityservice"
-        android:resource="@xml/whatsapp_service"/>
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.reactnativeaccessibilitymanagerplugin" >
 
-      <intent-filter>
-        <action android:name="android.accessibilityservice.AccessibilityService"/>
-      </intent-filter>
-    </service>
-  </application>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+        android:name="android.permission.BIND_ACCESSIBILITY_SERVICE"
+        tools:ignore="ProtectedPermissions" />
+
+    <application>
+
+      <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths" />
+        </provider>
+
+        <service
+            android:name=".WhatsappAccessibilityService"
+            android:exported="true"
+            android:label="Accessibility Service"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/whatsapp_service" />
+
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+        </service>
+    </application>
 
 </manifest>

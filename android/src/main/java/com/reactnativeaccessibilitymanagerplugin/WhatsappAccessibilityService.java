@@ -1,15 +1,12 @@
 package com.reactnativeaccessibilitymanagerplugin;
 
 import static com.reactnativeaccessibilitymanagerplugin.AccessibilityManagerPluginModule.*;
-
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
@@ -18,9 +15,6 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import com.facebook.react.bridge.ReactApplicationContext;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class WhatsappAccessibilityService extends AccessibilityService {
   public String signature = "";

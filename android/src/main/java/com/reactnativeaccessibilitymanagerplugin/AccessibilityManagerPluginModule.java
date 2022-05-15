@@ -4,9 +4,12 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.database.Cursor;
 import android.net.Uri;
@@ -35,6 +38,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import java.io.File;
 import java.util.List;
@@ -226,6 +230,7 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
       Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + reactContext.getPackageName()));
       reactContext.startActivityForResult(intent, DRAW_OVER_OTHER_APP_PERMISSION_REQUEST_CODE, null);
     }
+
     promise.resolve(true);
   }
 
@@ -238,6 +243,24 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
       promise.resolve(false);
     }
 
+  }
+
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  @ReactMethod
+  public void openAutoStartSettings(Promise promise) {
+    for (Intent intent : POWERMANAGER_INTENTS)
+    if (reactContext.getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+      try {
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+        reactContext.startActivity(intent);
+      } catch (ActivityNotFoundException e) {
+        Log.e(LOG_TAG, "Failed to launch AutoStart activity: " + e.getMessage());
+      }catch (Exception e){
+        e.printStackTrace();
+        Log.e(LOG_TAG, "Failed to launch AutoStart activity: " + e.getMessage());
+      }
+      break;
+    }
   }
 
   @SuppressLint("LongLogTag")
@@ -338,5 +361,21 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     reactContext.startActivityForResult(intent, 1, null);
     promise.resolve(true);
   }
+
+  private static final Intent[] POWERMANAGER_INTENTS = {
+    new Intent().setComponent(new ComponentName("com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity")),
+    new Intent().setComponent(new ComponentName("com.letv.android.letvsafe", "com.letv.android.letvsafe.AutobootManageActivity")),
+    new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity")),
+    new Intent().setComponent(new ComponentName("com.huawei.systemmanager", "com.huawei.systemmanager.appcontrol.activity.StartupAppControlActivity")),
+    new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity")),
+    new Intent().setComponent(new ComponentName("com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity")),
+    new Intent().setComponent(new ComponentName("com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity")),
+    new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity")),
+    new Intent().setComponent(new ComponentName("com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager")),
+    new Intent().setComponent(new ComponentName("com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity")),
+    new Intent().setComponent(new ComponentName("com.samsung.android.lool", "com.samsung.android.sm.ui.battery.BatteryActivity")),
+    new Intent().setComponent(new ComponentName("com.htc.pitroad", "com.htc.pitroad.landingpage.activity.LandingPageActivity")),
+    new Intent().setComponent(new ComponentName("com.asus.mobilemanager", "com.asus.mobilemanager.MainActivity"))
+  };
 }
 

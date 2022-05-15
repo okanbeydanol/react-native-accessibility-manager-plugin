@@ -36,6 +36,13 @@ export function openAccessibilitySettings(): Promise<boolean> {
   return AccessibilityManagerPlugin.openAccessibilitySettings();
 }
 
+export function isAutoStartOn(): Promise<boolean> {
+  return AccessibilityManagerPlugin.isAutoStartOn();
+}
+
+export function openAutoStartSettings(): Promise<boolean> {
+  return AccessibilityManagerPlugin.openAutoStartSettings();
+}
 export function sendImage(
   filePath: string,
   phoneNumber: string,
