@@ -1,6 +1,6 @@
 {
   "name": "react-native-accessibility-manager-plugin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "desc",
   "main": "lib/commonjs/index.js",
   "module": "lib/module/index.js",
