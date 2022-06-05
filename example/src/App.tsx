@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Text } from 'react-native';
-import {
-  openAutoStartSettings,
-  sendText,
-} from 'react-native-accessibility-manager-plugin';
+import { sendText } from 'react-native-accessibility-manager-plugin';
 import BackgroundService from 'react-native-background-actions';
 import { DeviceEventEmitter } from 'react-native';
+import {
+  isAccessibilityOn,
+  openAccessibilitySettings,
+} from 'react-native-accessibility-manager-plugin';
 const App = () => {
   // You can do anything in your task such as network requests, timers and so on,
   // as long as it doesn't touch UI. Once your task completes (i.e. the promise is resolved),
@@ -35,10 +36,12 @@ const App = () => {
   };
   BackgroundService.start(veryIntensiveTask, options);
   useEffect(() => {
-    openAutoStartSettings().then((asd: any) => {
-      console.log('%c Geldidiiiiiii', 'background: #222; color: #bada55', asd);
+    isAccessibilityOn().then((d) => {
+      console.log('%c IZIN GELDIIIIII:::', d);
+      if (!d) {
+        openAccessibilitySettings();
+      }
     });
-
     return () => {};
   }, []);
 
@@ -49,9 +52,11 @@ const App = () => {
     // ).then(async (a: any) => {
     //   console.log('%c burası', 'background: #222; color: #bada55', a);
     // });
-    sendText('905432962305', 'Merhaba nasılsunnnnnnn').then((asd: any) => {
-      console.log('%c a', 'background: #222; color: #bada55', asd);
-    });
+    sendText('905432962305', 'Merhaba nasılsunnnnnnn', '#SentedByOkan#').then(
+      (asd: any) => {
+        console.log('%c a', 'background: #222; color: #bada55', asd);
+      }
+    );
   };
   return (
     <TouchableOpacity onPress={onPress}>

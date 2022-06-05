@@ -1,6 +1,7 @@
 package com.reactnativeaccessibilitymanagerplugin;
 
 import static com.reactnativeaccessibilitymanagerplugin.AccessibilityManagerPluginModule.*;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
@@ -17,7 +18,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import java.util.List;
 
 public class WhatsappAccessibilityService extends AccessibilityService {
-  public String signature = "";
+  public static String signature = "#.~!#";
   private static ReactApplicationContext reactContext;
   public static String AccessibilityPreference = "AccessibilityPreference";
   public static String isServiceBinded = "isServiceBinded";
@@ -30,35 +31,40 @@ public class WhatsappAccessibilityService extends AccessibilityService {
     }
 
     AccessibilityNodeInfoCompat rootInActiveWindow = AccessibilityNodeInfoCompat.wrap(getRootInActiveWindow());
-
     // Whatsapp Message EditText id
-    List<AccessibilityNodeInfoCompat> messageNodeList2 = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp:id/caption");
-    List<AccessibilityNodeInfoCompat> messageNodeList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");
+    List<AccessibilityNodeInfoCompat> textMessageNodeList = rootInActiveWindow
+      .findAccessibilityNodeInfosByViewId("com.whatsapp:id/entry");// Text
+    List<AccessibilityNodeInfoCompat> mediaMessageNodeList = rootInActiveWindow
+      .findAccessibilityNodeInfosByViewId("com.whatsapp:id/caption");// Media
 
-    if ((messageNodeList2 == null || messageNodeList2.isEmpty()) && (messageNodeList == null || messageNodeList.isEmpty())) {
+    if ((mediaMessageNodeList == null || mediaMessageNodeList.isEmpty())
+      && (textMessageNodeList == null || textMessageNodeList.isEmpty())) {
       return;
     }
-
-    if (messageNodeList == null) {
-      // check if the whatsapp message EditText field is filled with text and ending with your suffix (explanation above)
-      AccessibilityNodeInfoCompat messageField = messageNodeList.get(0);
+    if (textMessageNodeList == null || textMessageNodeList.isEmpty()) {
+      // check if the whatsapp message EditText field is filled with text and ending
+      // with your suffix (explanation above)
+      AccessibilityNodeInfoCompat messageField = mediaMessageNodeList.get(0);
       if (messageField.getText() == null || messageField.getText().length() == 0
-        || !messageField.getText().toString().endsWith(signature)) { // So your service doesn't process any message, but the ones ending your apps suffix
+        || !messageField.getText().toString().endsWith(signature)) { // So your service doesn't process any message,
+        // but the ones ending your apps suffix
         return;
       }
     }
-
-    if (messageNodeList2 == null) {
-      // check if the whatsapp message EditText field is filled with text and ending with your suffix (explanation above)
-      AccessibilityNodeInfoCompat messageField = messageNodeList2.get(0);
+    if (mediaMessageNodeList == null || mediaMessageNodeList.isEmpty()) {
+      // check if the whatsapp message EditText field is filled with text and ending
+      // with your suffix (explanation above)
+      AccessibilityNodeInfoCompat messageField = textMessageNodeList.get(0);
       if (messageField.getText() == null || messageField.getText().length() == 0
-        || !messageField.getText().toString().endsWith(signature)) { // So your service doesn't process any message, but the ones ending your apps suffix
+        || !messageField.getText().toString().endsWith(signature)) { // So your service doesn't process any message,
+        // but the ones ending your apps suffix
         return;
       }
     }
 
     // Whatsapp send button id
-    List<AccessibilityNodeInfoCompat> sendMessageNodeInfoList = rootInActiveWindow.findAccessibilityNodeInfosByViewId("com.whatsapp:id/send");
+    List<AccessibilityNodeInfoCompat> sendMessageNodeInfoList = rootInActiveWindow
+      .findAccessibilityNodeInfosByViewId("com.whatsapp:id/send");
     if (sendMessageNodeInfoList == null || sendMessageNodeInfoList.isEmpty()) {
       return;
     }
@@ -124,4 +130,3 @@ public class WhatsappAccessibilityService extends AccessibilityService {
     super.onRebind(intent);
   }
 }
-

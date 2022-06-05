@@ -63,7 +63,7 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     return NAME;
   }
 
-  public static ReactApplicationContext getReactContext(){
+  public static ReactApplicationContext getReactContext() {
     return reactContext;
   }
 
@@ -221,7 +221,8 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   }
 
   @Override
-  public void onNewIntent(Intent intent) {}
+  public void onNewIntent(Intent intent) {
+  }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @ReactMethod
@@ -249,18 +250,18 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
   @ReactMethod
   public void openAutoStartSettings(Promise promise) {
     for (Intent intent : POWERMANAGER_INTENTS)
-    if (reactContext.getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
-      try {
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-        reactContext.startActivity(intent);
-      } catch (ActivityNotFoundException e) {
-        Log.e(LOG_TAG, "Failed to launch AutoStart activity: " + e.getMessage());
-      }catch (Exception e){
-        e.printStackTrace();
-        Log.e(LOG_TAG, "Failed to launch AutoStart activity: " + e.getMessage());
+      if (reactContext.getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) != null) {
+        try {
+          intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
+          reactContext.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+          Log.e(LOG_TAG, "Failed to launch AutoStart activity: " + e.getMessage());
+        } catch (Exception e) {
+          e.printStackTrace();
+          Log.e(LOG_TAG, "Failed to launch AutoStart activity: " + e.getMessage());
+        }
+        break;
       }
-      break;
-    }
   }
 
   @SuppressLint("LongLogTag")
@@ -323,7 +324,7 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @ReactMethod
-  public void sendText(String phone, String text, Promise promise) {
+  public void sendText(String phone, String text, String signature, Promise promise) {
     if (phone == null || phone == "" || text == null || text == "") {
       promise.resolve(false);
     }
@@ -332,14 +333,15 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     intent.setType("text/plain");
     intent.putExtra("jid", phone + "@s.whatsapp.net");
     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-    intent.putExtra(Intent.EXTRA_TEXT, text);
+    intent.putExtra(Intent.EXTRA_TEXT, text + "\n" + ((signature != null && signature != "") ? signature : "#.~!#"));
+    WhatsappAccessibilityService.signature = ((signature != null && signature != "") ? signature : "#.~!#");
     reactContext.startActivityForResult(intent, 1, null);
     promise.resolve(true);
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
   @ReactMethod
-  public void sendImage(String filepath, String phone, String text, Promise promise) {
+  public void sendImage(String filepath, String phone, String text, String signature, Promise promise) {
     if (filepath == null || filepath == "" | phone == null || phone == "") {
       promise.resolve(false);
     }
@@ -356,7 +358,8 @@ public class AccessibilityManagerPluginModule extends ReactContextBaseJavaModule
     intent.putExtra("jid", phone + "@s.whatsapp.net");
     intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
     intent.putExtra(Intent.EXTRA_STREAM, imageUri);
-    intent.putExtra(Intent.EXTRA_TEXT, text);
+    intent.putExtra(Intent.EXTRA_TEXT, text + "\n" + ((signature != null && signature != "") ? signature : "#.~!#"));
+    WhatsappAccessibilityService.signature = ((signature != null && signature != "") ? signature : "#.~!#");
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
     reactContext.startActivityForResult(intent, 1, null);
     promise.resolve(true);

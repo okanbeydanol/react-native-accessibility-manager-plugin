@@ -46,10 +46,20 @@ export function openAutoStartSettings(): Promise<boolean> {
 export function sendImage(
   filePath: string,
   phoneNumber: string,
-  text?: string
+  text?: string,
+  signature?: string
 ): Promise<boolean> {
-  return AccessibilityManagerPlugin.sendImage(filePath, phoneNumber, text);
+  return AccessibilityManagerPlugin.sendImage(
+    filePath,
+    phoneNumber,
+    text,
+    signature
+  );
 }
-export function sendText(phoneNumber: string, text: string): Promise<boolean> {
-  return AccessibilityManagerPlugin.sendText(phoneNumber, text);
+export function sendText(
+  phoneNumber: string,
+  text: string,
+  signature?: string
+): Promise<boolean> {
+  return AccessibilityManagerPlugin.sendText(phoneNumber, text, signature);
 }
